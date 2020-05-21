@@ -1,0 +1,18 @@
+# Ignore all (so executables with no extension are ignored)
+*
+
+# Include files with extensions
+!*.*
+
+# Include directories
+!*/
+
+# Include LICENSE
+!LICENSE
+
+# Begin actual ignores
+*.o
+
+*.swp
+*.tmp
+*.vim
