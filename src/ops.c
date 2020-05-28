@@ -6,6 +6,8 @@
 
 /**
  * Converts a string into a byte array
+ * key: pointer to char[NK * BPW]
+ * keystr: pointer to string of length NK * BPW * 2
  */
 void str_bytes (char *key, const char *keystr) {
     unsigned int cx;
