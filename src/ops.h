@@ -1,6 +1,6 @@
 #ifndef OPS_H_20200520_200225
 #define OPS_H_20200520_200225
 
-char* key_expand ();
+void key_expand (const char *key);
 
 #endif /* OPS_H_20200520_200225 */
