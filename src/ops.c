@@ -96,7 +96,7 @@ void str_bytes (char *dest, const char *src, unsigned int len) {
         } else if (conv >= 'a' && conv <= 'f') {
             conv -= 'a';
             conv += 10;
-        } else {
+        } else if (conv >= 'A' && conv <= 'F') {
             conv -= 'A';
             conv += 10;
         }
@@ -109,7 +109,7 @@ void str_bytes (char *dest, const char *src, unsigned int len) {
         } else if (conv >= 'a' && conv <= 'f') {
             conv -= 'a';
             conv += 10;
-        } else {
+        } else if (conv >= 'A' && conv <= 'F') {
             conv -= 'A';
             conv += 10;
         }

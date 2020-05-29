@@ -9,7 +9,7 @@
 #include "ops.h"
 #include "output_ctrl.h"
 
-const char *optstring = ":i:k:n";
+const char *optstring = ":hi:k:n";
 
 /* Default values for key and input */
 char key[] = "2b7e151628aed2a6abf7158809cf4f3c";
@@ -19,7 +19,8 @@ char input[] = "3243f6a8885a308d313198a2e0370734";
 int use_curses = 1;
 
 void usage () {
-    printf("Usage: ./aes128-visualizer [options]\n");
+    printf("Usage: aes128-visualizer [options]\n");
+    printf("    -h          print this help\n");
     printf("    -i data     hex string to use as input, at most 16 bytes\n");
     printf("                    anything longer is truncated\n");
     printf("    -k key      encryption key (128 bits)\n");
@@ -35,6 +36,9 @@ int main (int argc, char **argv) {
     /* Parse arguments */
     while ((opt = getopt(argc, argv, optstring)) != -1) {
         switch (opt) {
+        case 'h':
+            usage();
+            exit(1);
         case 'i':
             strncpy(input, optarg, 32);
             break;
@@ -60,6 +64,19 @@ int main (int argc, char **argv) {
             exit(1);
         }
     }
+
+    /* Test the key length */
+    if (strlen(key) != NB * BPW * 2) {
+        printf("Key not of 128 bit length!\n");
+        usage();
+        exit(1);
+    }
+
+    /* Pad the input with null bytes if < 16 bytes long */
+    if (strlen(input) < NB * BPW * 2) {
+        memset(input + strlen(input), 0, (NB * BPW * 2) - strlen(input));
+    }
+    printf("Input len: %lu", strlen(input));
 
     /* Initialize the schedule */
     schedule = calloc(NB * (NR + 1), sizeof(*schedule));
