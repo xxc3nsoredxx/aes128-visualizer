@@ -1,17 +1,65 @@
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include <ncurses.h>
 
 #include "aesvars.h"
 #include "ops.h"
+#include "output_ctrl.h"
 
-const char *key = "2b7e151628aed2a6abf7158809cf4f3c";
-const char *input = "3243f6a8885a308d313198a2e0370734";
+const char *optstring = ":i:k:n";
 
-int main () {
+/* Default values for key and input */
+char key[] = "2b7e151628aed2a6abf7158809cf4f3c";
+char input[] = "3243f6a8885a308d313198a2e0370734";
+
+/* Control flag for using ncurses */
+int use_curses = 1;
+
+void usage () {
+    printf("Usage: ./aes128-visualizer [options]\n");
+    printf("    -i data     hex string to use as input, at most 16 bytes\n");
+    printf("                    anything longer is truncated\n");
+    printf("    -k key      encryption key (128 bits)\n");
+    printf("    -n          no ncurses visualization, dump to terminal\n");
+}
+
+int main (int argc, char **argv) {
+    int opt;
     unsigned int cx;
     unsigned int cx2;
     unsigned int round;
+
+    /* Parse arguments */
+    while ((opt = getopt(argc, argv, optstring)) != -1) {
+        switch (opt) {
+        case 'i':
+            strncpy(input, optarg, 32);
+            break;
+        case 'k':
+            strncpy(key, optarg, 32);
+            break;
+        case 'n':
+            use_curses = 0;
+            break;
+        /* No argument given */
+        case ':':
+            printf("Option '%s' requires %s as an argument.\n",
+                *(argv + optind - 1),
+                (!strcmp(*(argv + optind - 1), "-i")) ? "input data"
+                : "a key"
+            );
+            usage();
+            exit(1);
+        /* Invalid option */
+        case '?':
+            printf("Invalid option: '%s'\n", *(argv + optind - 1));
+            usage();
+            exit(1);
+        }
+    }
 
     /* Initialize the schedule */
     schedule = calloc(NB * (NR + 1), sizeof(*schedule));

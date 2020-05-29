@@ -1,0 +1,6 @@
+#ifndef OUTPUT_CTRL_H_20200528_224855
+#define OUTPUT_CTRL_H_20200528_224855
+
+extern int use_curses;
+
+#endif /* OUTPUT_CTRL_H_20200528_224855 */

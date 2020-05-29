@@ -4,6 +4,7 @@
 
 #include "aesvars.h"
 #include "ops.h"
+#include "output_ctrl.h"
 
 /**
  * Perfomrs a multiplication by x in the finite field
