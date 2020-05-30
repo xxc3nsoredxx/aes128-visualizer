@@ -3,7 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <ncurses.h>
+#include <curses.h>
+#include <panel.h>
 
 #include "aesvars.h"
 #include "ops.h"
@@ -14,9 +15,6 @@ const char *optstring = ":hi:k:n";
 /* Default values for key and input */
 char key[] = "2b7e151628aed2a6abf7158809cf4f3c";
 char input[] = "3243f6a8885a308d313198a2e0370734";
-
-/* Control flag for using ncurses */
-int use_curses = 1;
 
 void usage () {
     printf("Usage: aes128-visualizer [options]\n");
@@ -40,13 +38,24 @@ int main (int argc, char **argv) {
             usage();
             exit(1);
         case 'i':
-            strncpy(input, optarg, 32);
+            /* Reset input to null bytes */
+            memset(input, 0, NB * BPW * 2);
+            strncpy(input, optarg, NB * BPW * 2);
             break;
         case 'k':
-            strncpy(key, optarg, 32);
+            /* Reset key to null bytes */
+            memset(key, 0, NK * BPW * 2);
+            strncpy(key, optarg, NK * BPW * 2);
+
+            /* Test the key length */
+            if (strlen(key) != NB * BPW * 2) {
+                printf("Key not of 128 bit length!\n");
+                usage();
+                exit(1);
+            }
             break;
         case 'n':
-            use_curses = 0;
+            use_ncurses = 0;
             break;
         /* No argument given */
         case ':':
@@ -65,18 +74,9 @@ int main (int argc, char **argv) {
         }
     }
 
-    /* Test the key length */
-    if (strlen(key) != NB * BPW * 2) {
-        printf("Key not of 128 bit length!\n");
-        usage();
-        exit(1);
+    if (use_ncurses) {
+        init_ncurses();
     }
-
-    /* Pad the input with null bytes if < 16 bytes long */
-    if (strlen(input) < NB * BPW * 2) {
-        memset(input + strlen(input), 0, (NB * BPW * 2) - strlen(input));
-    }
-    printf("Input len: %lu", strlen(input));
 
     /* Initialize the schedule */
     schedule = calloc(NB * (NR + 1), sizeof(*schedule));
@@ -92,12 +92,15 @@ int main (int argc, char **argv) {
     /* Create the key schedule */
     key_expand(key);
     /* Print the key schedule */
-    printf("Key schedule:\n");
-    for (cx = 0; cx < NB * (NR + 1); cx++) {
-        for (cx2 = 0; cx2 < BPW; cx2++) {
-            printf("%02hhx", *(*(schedule + cx) + cx2));
+    if (use_ncurses) {
+    } else {
+        printf("Key schedule:\n");
+        for (cx = 0; cx < NB * (NR + 1); cx++) {
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                printf("%02hhx", *(*(schedule + cx) + cx2));
+            }
+            printf("\n");
         }
-        printf("\n");
     }
 
     /* Copy input into state */
@@ -115,14 +118,17 @@ int main (int argc, char **argv) {
 
     /* AES rounds */
     for (round = 0; round < NR + 1; round++) {
-        printf("Round %u\n", round);
-        printf("========\n");
-        printf("State: \n");
-        for (cx = 0; cx < NB; cx++) {
-            for (cx2 = 0; cx2 < BPW; cx2++) {
-                printf("%02hhx ", *(*(state + cx) + cx2));
+        if (use_ncurses) {
+        } else {
+            printf("Round %u\n", round);
+            printf("========\n");
+            printf("State:\n");
+            for (cx = 0; cx < NB; cx++) {
+                for (cx2 = 0; cx2 < BPW; cx2++) {
+                    printf("%02hhx ", *(*(state + cx) + cx2));
+                }
+                printf("\n");
             }
-            printf("\n");
         }
 
         /* Round 0 only adds key */
@@ -137,24 +143,30 @@ int main (int argc, char **argv) {
                 *c = sub_byte(*c);
             }
         }
-        printf("After S-Box: \n");
-        for (cx = 0; cx < NB; cx++) {
-            for (cx2 = 0; cx2 < BPW; cx2++) {
-                printf("%02hhx ", *(*(state + cx) + cx2));
+        if (use_ncurses) {
+        } else {
+            printf("After S-Box:\n");
+            for (cx = 0; cx < NB; cx++) {
+                for (cx2 = 0; cx2 < BPW; cx2++) {
+                    printf("%02hhx ", *(*(state + cx) + cx2));
+                }
+                printf("\n");
             }
-            printf("\n");
         }
 
         /* Shift the rows */
         for (cx = 1; cx < BPW; cx++) {
             shift_row(*(state + cx), cx);
         }
-        printf("After Row Shifts: \n");
-        for (cx = 0; cx < NB; cx++) {
-            for (cx2 = 0; cx2 < BPW; cx2++) {
-                printf("%02hhx ", *(*(state + cx) + cx2));
+        if (use_ncurses) {
+        } else {
+            printf("After Row Shifts:\n");
+            for (cx = 0; cx < NB; cx++) {
+                for (cx2 = 0; cx2 < BPW; cx2++) {
+                    printf("%02hhx ", *(*(state + cx) + cx2));
+                }
+                printf("\n");
             }
-            printf("\n");
         }
 
         /* Mix the columns except last round */
@@ -164,43 +176,53 @@ int main (int argc, char **argv) {
         for (cx = 0; cx < NB; cx++) {
             mix_col(cx);
         }
-        printf("After Mix Columns: \n");
-        for (cx = 0; cx < NB; cx++) {
-            for (cx2 = 0; cx2 < BPW; cx2++) {
-                printf("%02hhx ", *(*(state + cx) + cx2));
+        if (use_ncurses) {
+        } else {
+            printf("After Mix Columns:\n");
+            for (cx = 0; cx < NB; cx++) {
+                for (cx2 = 0; cx2 < BPW; cx2++) {
+                    printf("%02hhx ", *(*(state + cx) + cx2));
+                }
+                printf("\n");
             }
-            printf("\n");
         }
 
 add_key:
         /* Add the round key */
         add_round_key(round);
 
-        /* Blank between rounds */
-        printf("\n");
+        if (!use_ncurses) {
+            /* Blank between rounds */
+            printf("\n");
+        }
     }
 
     /* Print the final state */
-    printf("Final State: \n");
-    for (cx = 0; cx < NB; cx++) {
-        for (cx2 = 0; cx2 < BPW; cx2++) {
-            printf("%02hhx ", *(*(state + cx) + cx2));
+    if (use_ncurses) {
+    } else {
+        printf("Final State:\n");
+        for (cx = 0; cx < NB; cx++) {
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                printf("%02hhx ", *(*(state + cx) + cx2));
+            }
+            printf("\n");
         }
         printf("\n");
     }
-    printf("\n");
 
-    /* Print the inputs */
-    printf("Plaintext:  %s\n", input);
-    printf("Key:        %s\n", key);
-    /* Output as string */
-    printf("Ciphertext: ");
-    for (cx = 0; cx < NB; cx++) {
-        for (cx2 = 0; cx2 < BPW; cx2++) {
-            printf("%02hhx", *(*(state + cx2) + cx));
+    /* Print the results */
+    if (use_ncurses) {
+    } else {
+        printf("Plaintext:  %s\n", input);
+        printf("Key:        %s\n", key);
+        printf("Ciphertext: ");
+        for (cx = 0; cx < NB; cx++) {
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                printf("%02hhx", *(*(state + cx2) + cx));
+            }
         }
+        printf("\n");
     }
-    printf("\n");
 
     /* Cleanup */
     for (cx = 0; cx < NB; cx++) {
@@ -211,5 +233,9 @@ add_key:
         free(*(schedule + cx));
     }
     free(schedule);
+    if (use_ncurses) {
+        getch();
+        leave_ncurses();
+    }
     return 0;
 }

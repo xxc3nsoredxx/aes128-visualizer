@@ -170,12 +170,15 @@ void add_round_key (unsigned int round) {
     }
 
     /* Print the round key */
-    printf("Round key: \n");
-    for (cx = 0; cx < NB; cx++) {
-        for (cx2 = 0; cx2 < BPW; cx2++) {
-            printf("%02hhx ", *(*(key + cx) + cx2));
+    if (use_ncurses) {
+    } else {
+        printf("Round key:\n");
+        for (cx = 0; cx < NB; cx++) {
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                printf("%02hhx ", *(*(key + cx) + cx2));
+            }
+            printf("\n");
         }
-        printf("\n");
     }
 
     /* Add it to the state */
