@@ -20,6 +20,8 @@ struct window_s state_win;
 struct window_s round_key_win;
 /* S-Box window */
 struct window_s s_box_win;
+/* Parameters window */
+struct window_s params_win;
 
 /* Backup of cursor state */
 int curs_bu;
@@ -109,24 +111,25 @@ void init_ncurses () {
              COLS - (11 + 2), 0,
              "Schedule");
     init_win(&state_win,
-            11 + 2, 7 + 2,
-            0, 0,
-            "State");
+             11 + 2, 7 + 2,
+             0, 0,
+             "State");
     init_win(&round_key_win,
-            11 + 2, 7 + 2,
-            state_win.x + state_win.width, 0,
-            "Round Key");
+             11 + 2, 7 + 2,
+             state_win.x + state_win.width, 0,
+             "Round Key");
     init_win(&s_box_win,
-            50 + 2, 33 + 2,
-            (COLS - (50 + 2)) / 2, (LINES - (33 + 2)) / 2,
-            "S-Box");
+             50 + 2, 33 + 2,
+             (COLS - (50 + 2)) / 2, (LINES - (33 + 2)) / 2,
+             "S-Box");
     pop_sbox_win();
+    init_win(&params_win,
+             32 + 8 + 2, 3 + 2,
+             round_key_win.x + round_key_win.width, 0,
+             "AES-128 Parameters");
 
-    /* Show the windows */
-    show_panel(key_sched_win.pan);
-    show_panel(state_win.pan);
-    show_panel(round_key_win.pan);
-    show_panel(s_box_win.pan);
+    /* Show the windows, except for S-Box */
+    hide_panel(s_box_win.pan);
     update_panels();
     doupdate();
 }

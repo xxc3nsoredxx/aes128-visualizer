@@ -10,6 +10,7 @@
 #include "ops.h"
 #include "output_ctrl.h"
 
+/* String of available options */
 const char *optstring = ":hi:k:n";
 
 /* Default values for key and input */
@@ -76,6 +77,15 @@ int main (int argc, char **argv) {
 
     if (use_ncurses) {
         init_ncurses();
+        /* Populate the parameters window */
+        mvwprintw(params_win.win, 1, 1,
+                  "Input:  %s", input);
+        mvwprintw(params_win.win, 2, 1,
+                  "Key:    %s", key);
+        mvwprintw(params_win.win, 3, 1,
+                  "Output:");
+        update_panels();
+        doupdate();
     }
 
     /* Initialize the schedule */
