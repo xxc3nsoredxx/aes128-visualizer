@@ -9,11 +9,15 @@ struct window_s {
     WINDOW *win;
     PANEL *pan;
     char *title;
+    int x;
+    int y;
 };
 
 extern int use_ncurses;
 
 extern struct window_s key_sched_win;
+extern struct window_s state_win;
+extern struct window_s round_key_win;
 
 void init_ncurses ();
 void leave_ncurses ();

@@ -11,8 +11,12 @@
 /* Control flag for using ncurses */
 int use_ncurses = 1;
 
-/* Window that displays the key schedule */
+/* Key schedule window */
 struct window_s key_sched_win;
+/* State window */
+struct window_s state_win;
+/* Round key window */
+struct window_s round_key_win;
 
 /* Backup of cursor state */
 int curs_bu;
@@ -22,11 +26,14 @@ int curs_bu;
  * w: pointer to a window_s
  */
 void init_win (struct window_s *w,
-               int lines, int cols, int x, int y,
+               int width, int height,
+               int x, int y,
                const char *title) {
-    w->win = newwin(lines, cols, y, x);
+    w->win = newwin(height, width, y, x);
     w->pan = new_panel(w->win);
     w->title = strdup(title);
+    w->x = x;
+    w->y = y;
     wborder(w->win, 0, 0, 0, 0, 0, 0, 0, 0);
     mvwprintw(w->win, 0, 1,
               "%s", w->title);
@@ -52,11 +59,22 @@ void init_ncurses () {
 
     /* Create the windows */
     init_win(&key_sched_win,
-             0, 0, (COLS - 8) - 2, 0,
+             11 + 2, 0,
+             COLS - (11 + 2), 0,
              "Schedule");
+    init_win(&state_win,
+            11 + 2, 7 + 2,
+            0, 0,
+            "State");
+    init_win(&round_key_win,
+            11 + 2, 7 + 2,
+            state_win.x + 11 + 2, 0,
+            "Round Key");
 
     /* Show the windows */
     show_panel(key_sched_win.pan);
+    show_panel(state_win.pan);
+    show_panel(round_key_win.pan);
     update_panels();
     doupdate();
 }
@@ -66,7 +84,9 @@ void init_ncurses () {
  */
 void leave_ncurses () {
     /* Delete the windows */
+    remove_win(&state_win);
     remove_win(&key_sched_win);
+    remove_win(&round_key_win);
 
     curs_set(curs_bu);
     endwin();
