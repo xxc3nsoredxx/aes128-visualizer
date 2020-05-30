@@ -79,11 +79,11 @@ int main (int argc, char **argv) {
         init_ncurses();
         /* Populate the parameters window */
         mvwprintw(params_win.win, 1, 1,
-                  "Input:  %s", input);
+                  "Plaintext:  %s", input);
         mvwprintw(params_win.win, 2, 1,
-                  "Key:    %s", key);
+                  "Key:        %s", key);
         mvwprintw(params_win.win, 3, 1,
-                  "Output:");
+                  "Ciphertext:");
         update_panels();
         doupdate();
     }
@@ -129,6 +129,15 @@ int main (int argc, char **argv) {
     /* AES rounds */
     for (round = 0; round < NR + 1; round++) {
         if (use_ncurses) {
+            /* Display state in the state window */
+            for (cx = 0; cx < NB; cx++) {
+                for (cx2 = 0; cx2 < BPW; cx2++) {
+                    mvwprintw(state_win.win, 1 + (cx * 2), 1 + (cx2 * 3),
+                              "%02hhx", *(*(state + cx) + cx2));
+                    update_panels();
+                    doupdate();
+                }
+            }
         } else {
             printf("Round %u\n", round);
             printf("========\n");
@@ -209,6 +218,15 @@ add_key:
 
     /* Print the final state */
     if (use_ncurses) {
+        /* Display state in the state window */
+        for (cx = 0; cx < NB; cx++) {
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                mvwprintw(state_win.win, 1 + (cx * 2), 1 + (cx2 * 3),
+                          "%02hhx", *(*(state + cx) + cx2));
+                update_panels();
+                doupdate();
+            }
+        }
     } else {
         printf("Final State:\n");
         for (cx = 0; cx < NB; cx++) {
@@ -222,6 +240,15 @@ add_key:
 
     /* Print the results */
     if (use_ncurses) {
+        /* Update the parameters window */
+        for (cx = 0; cx < NB; cx++) {
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                mvwprintw(params_win.win, 3, 13 + (((cx * NB) + cx2) * 2),
+                          "%02hhx", *(*(state + cx2) + cx));
+                update_panels();
+                doupdate();
+            }
+        }
     } else {
         printf("Plaintext:  %s\n", input);
         printf("Key:        %s\n", key);

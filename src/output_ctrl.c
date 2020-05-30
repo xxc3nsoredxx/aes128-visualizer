@@ -124,7 +124,7 @@ void init_ncurses () {
              "S-Box");
     pop_sbox_win();
     init_win(&params_win,
-             32 + 8 + 2, 3 + 2,
+             32 + 12 + 2, 3 + 2,
              round_key_win.x + round_key_win.width, 0,
              "AES-128 Parameters");
 
@@ -139,6 +139,7 @@ void init_ncurses () {
  */
 void leave_ncurses () {
     /* Delete the windows */
+    remove_win(&params_win);
     remove_win(&s_box_win);
     remove_win(&round_key_win);
     remove_win(&state_win);
