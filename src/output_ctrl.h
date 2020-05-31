@@ -9,10 +9,10 @@ struct window_s {
     WINDOW *win;
     PANEL *pan;
     char *title;
-    int width;
-    int height;
-    int x;
-    int y;
+    unsigned int width;
+    unsigned int height;
+    unsigned int x;
+    unsigned int y;
 };
 
 extern int use_ncurses;
@@ -23,7 +23,11 @@ extern struct window_s round_key_win;
 extern struct window_s s_box_win;
 extern struct window_s params_win;
 
+extern unsigned int key_sched_top;
+extern unsigned int key_sched_count;
+
 void init_ncurses ();
 void leave_ncurses ();
+void update_schedule ();
 
 #endif /* OUTPUT_CTRL_H_20200528_224855 */

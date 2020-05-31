@@ -23,6 +23,11 @@ struct window_s s_box_win;
 /* Parameters window */
 struct window_s params_win;
 
+/* Index to the top most schedule element to show */
+unsigned int key_sched_top;
+/* Number of elements to show */
+unsigned int key_sched_count;
+
 /* Backup of cursor state */
 int curs_bu;
 
@@ -37,8 +42,8 @@ void init_win (struct window_s *w,
     w->win = newwin(height, width, y, x);
     w->pan = new_panel(w->win);
     w->title = strdup(title);
-    w->width = width;
-    w->height = height;
+    w->width = (width == 0) ? COLS : width;
+    w->height = (height == 0) ? LINES : height;
     w->x = x;
     w->y = y;
     wborder(w->win, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -110,6 +115,9 @@ void init_ncurses () {
              11 + 2, 0,
              COLS - (11 + 2), 0,
              "Schedule");
+    /* Set up the display parameters for the key schedule */
+    key_sched_top = 0;
+    key_sched_count = 0;
     init_win(&state_win,
              11 + 2, 7 + 2,
              0, 0,
@@ -147,4 +155,22 @@ void leave_ncurses () {
 
     curs_set(curs_bu);
     endwin();
+}
+
+/**
+ * Used to update the key schedule display
+ */
+void update_schedule () {
+    unsigned int cx;
+    unsigned int cx2;
+
+    /* Only display the number of elements requested */
+    for (cx = 0; cx < key_sched_count; cx++) {
+        for (cx2 = 0; cx2 < BPW; cx2++) {
+            mvwprintw(key_sched_win.win, 1 + cx, 1 + (cx2 * 3),
+                      "%02hhx", *(*(schedule + key_sched_top + cx) + cx2));
+        }
+        update_panels();
+        doupdate();
+    }
 }

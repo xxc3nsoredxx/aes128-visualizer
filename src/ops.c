@@ -128,9 +128,19 @@ void key_expand (const char *keystr) {
 
     str_bytes(key, keystr, NK);
 
+    /* Set the cursor in the top left */
+    if (use_ncurses) {
+        wmove(key_sched_win.win, 1, 1);
+    }
+
     /* Copy the key into the first part of the schedule */
     for (cx = 0; cx < NK; cx++) {
         memcpy(*(schedule + cx), key + (cx * NK), BPW);
+        /* Update the schedule window */
+        if (use_ncurses) {
+            key_sched_count++;
+            update_schedule();
+        }
     }
 
     /* Expand the key into the schedule */
@@ -149,6 +159,16 @@ void key_expand (const char *keystr) {
         /* schedule[cx] = schedule[cx-NK] xor temp */
         xor_word(temp, *(schedule + cx - NK));
         memcpy(*(schedule + cx), temp, BPW);
+        /* Update the schedule window */
+        if (use_ncurses) {
+            /* Test whether to scroll or append */
+            if (key_sched_count < key_sched_win.height - 2) {
+                key_sched_count++;
+            } else {
+                key_sched_top++;
+            }
+            update_schedule();
+        }
     }
 }
 

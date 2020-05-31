@@ -103,6 +103,8 @@ int main (int argc, char **argv) {
     key_expand(key);
     /* Print the key schedule */
     if (use_ncurses) {
+        key_sched_top = 0;
+        update_schedule();
     } else {
         printf("Key schedule:\n");
         for (cx = 0; cx < NB * (NR + 1); cx++) {
@@ -240,7 +242,7 @@ add_key:
 
     /* Print the results */
     if (use_ncurses) {
-        /* Update the parameters window */
+        /* Update the parameters window with the final ciphertext */
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
                 mvwprintw(params_win.win, 3, 13 + (((cx * NB) + cx2) * 2),
