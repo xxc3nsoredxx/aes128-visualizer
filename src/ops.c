@@ -128,11 +128,6 @@ void key_expand (const char *keystr) {
 
     str_bytes(key, keystr, NK);
 
-    /* Set the cursor in the top left */
-    if (use_ncurses) {
-        wmove(key_sched_win.win, 1, 1);
-    }
-
     /* Copy the key into the first part of the schedule */
     for (cx = 0; cx < NK; cx++) {
         memcpy(*(schedule + cx), key + (cx * NK), BPW);
@@ -191,6 +186,21 @@ void add_round_key (unsigned int round) {
 
     /* Print the round key */
     if (use_ncurses) {
+        for (cx = 0; cx < NB; cx++) {
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                mvwprintw(round_key_win.win, 1 + (cx * 2), 1 + (cx2 * 3),
+                          "%02hhx", *(*(key + cx) + cx2));
+                update_panels();
+                doupdate();
+            }
+            if (key_sched_top >= NB * (NR + 1) - (key_sched_win.height - 2)) {
+                if (key_sched_count != 0) {
+                    key_sched_count--;
+                }
+            }
+            key_sched_top++;
+            update_schedule();
+        }
     } else {
         printf("Round key:\n");
         for (cx = 0; cx < NB; cx++) {

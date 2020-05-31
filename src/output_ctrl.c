@@ -164,13 +164,18 @@ void update_schedule () {
     unsigned int cx;
     unsigned int cx2;
 
+    /* Clear the current display */
+    for (cx = 0; cx < key_sched_win.height - 2; cx++) {
+        mvwprintw(key_sched_win.win, 1 + cx, 1, "           ");
+    }
+
     /* Only display the number of elements requested */
     for (cx = 0; cx < key_sched_count; cx++) {
         for (cx2 = 0; cx2 < BPW; cx2++) {
             mvwprintw(key_sched_win.win, 1 + cx, 1 + (cx2 * 3),
                       "%02hhx", *(*(schedule + key_sched_top + cx) + cx2));
         }
-        update_panels();
-        doupdate();
     }
+    update_panels();
+    doupdate();
 }
