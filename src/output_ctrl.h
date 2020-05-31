@@ -22,6 +22,8 @@ extern struct window_s state_win;
 extern struct window_s round_key_win;
 extern struct window_s s_box_win;
 extern struct window_s params_win;
+extern struct window_s ops_win;
+extern struct window_s step_win;
 
 extern unsigned int key_sched_top;
 extern unsigned int key_sched_count;

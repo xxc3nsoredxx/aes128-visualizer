@@ -22,6 +22,10 @@ struct window_s round_key_win;
 struct window_s s_box_win;
 /* Parameters window */
 struct window_s params_win;
+/* Operations window */
+struct window_s ops_win;
+/* Current step window */
+struct window_s step_win;
 
 /* Index to the top most schedule element to show */
 unsigned int key_sched_top;
@@ -42,8 +46,8 @@ void init_win (struct window_s *w,
     w->win = newwin(height, width, y, x);
     w->pan = new_panel(w->win);
     w->title = strdup(title);
-    w->width = (width == 0) ? COLS : width;
-    w->height = (height == 0) ? LINES : height;
+    w->width = (width == 0) ? COLS - x : width;
+    w->height = (height == 0) ? LINES - y : height;
     w->x = x;
     w->y = y;
     wborder(w->win, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -135,6 +139,14 @@ void init_ncurses () {
              32 + 12 + 2, 3 + 2,
              round_key_win.x + round_key_win.width, 0,
              "AES-128 Parameters");
+    init_win(&ops_win,
+             key_sched_win.x - 1, 0,
+             0, state_win.height,
+             "Operations");
+    init_win(&step_win,
+             params_win.width, 3,
+             params_win.x, params_win.height + 1,
+             "Current Step");
 
     /* Show the windows, except for S-Box */
     hide_panel(s_box_win.pan);
@@ -147,6 +159,8 @@ void init_ncurses () {
  */
 void leave_ncurses () {
     /* Delete the windows */
+    remove_win(&step_win);
+    remove_win(&ops_win);
     remove_win(&params_win);
     remove_win(&s_box_win);
     remove_win(&round_key_win);

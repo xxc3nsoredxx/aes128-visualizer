@@ -128,6 +128,28 @@ int main (int argc, char **argv) {
         }
     }
 
+    /* Animate the input copying */
+    if (use_ncurses) {
+        mvwprintw(step_win.win, 1, 1,
+                  "Copy input into state");
+        for (cx = 0; cx < NB; cx++) {
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                /* Put in state window */
+                mvwprintw(state_win.win, 1 + (cx2 * 2), 1 + (cx * 3),
+                          "%02hhx", *(*(state + cx2) + cx));
+                /* Highlight the input bytes */
+                mvwchgat(params_win.win, 1, 13 + (2 * ((cx * NB) + cx2)), 2,
+                         A_STANDOUT, 0, 0);
+                update_panels();
+                doupdate();
+                napms(100);
+            }
+        }
+        /* Un-highlight input */
+        mvwchgat(params_win.win, 1, 13, 32,
+                 A_NORMAL, 0, 0);
+    }
+
     /* AES rounds */
     for (round = 0; round < NR + 1; round++) {
         if (use_ncurses) {
