@@ -11,6 +11,8 @@
 
 /* Control flag for using ncurses */
 int use_ncurses = 1;
+/* Milliseconds to delay for */
+const int DELAY_MS = 100;
 
 /* Key schedule window */
 struct window_s key_sched_win;

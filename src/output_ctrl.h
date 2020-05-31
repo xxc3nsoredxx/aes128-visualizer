@@ -16,6 +16,7 @@ struct window_s {
 };
 
 extern int use_ncurses;
+extern const int DELAY_MS;
 
 extern struct window_s key_sched_win;
 extern struct window_s state_win;

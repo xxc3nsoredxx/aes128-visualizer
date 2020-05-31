@@ -100,6 +100,10 @@ int main (int argc, char **argv) {
     }
 
     /* Create the key schedule */
+    if (use_ncurses) {
+        mvwprintw(step_win.win, 1, 1,
+                  "Key expansion");
+    }
     key_expand(key);
     /* Print the key schedule */
     if (use_ncurses) {
@@ -131,6 +135,8 @@ int main (int argc, char **argv) {
     /* Animate the input copying */
     if (use_ncurses) {
         mvwprintw(step_win.win, 1, 1,
+                  "                                            ");
+        mvwprintw(step_win.win, 1, 1,
                   "Copy input into state");
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
@@ -142,7 +148,7 @@ int main (int argc, char **argv) {
                          A_STANDOUT, 0, 0);
                 update_panels();
                 doupdate();
-                napms(100);
+                napms(DELAY_MS);
             }
         }
         /* Un-highlight input */
