@@ -17,6 +17,7 @@ struct window_s {
 
 extern int use_ncurses;
 extern const int DELAY_MS;
+extern const char *ops [];
 
 extern struct window_s key_sched_win;
 extern struct window_s state_win;
@@ -32,5 +33,6 @@ extern unsigned int key_sched_count;
 void init_ncurses ();
 void leave_ncurses ();
 void update_schedule ();
+void highlight_op (int op);
 
 #endif /* OUTPUT_CTRL_H_20200528_224855 */

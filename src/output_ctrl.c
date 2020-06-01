@@ -7,12 +7,23 @@
 #include "aesvars.h"
 #include "output_ctrl.h"
 
+#define MAX(A,B) (((A) > (B)) ? (A) : (B))
 #define CURSOR_HIDE 0
 
 /* Control flag for using ncurses */
 int use_ncurses = 1;
 /* Milliseconds to delay for */
 const int DELAY_MS = 100;
+/* List of operations */
+const char *ops [] = {
+    "Copy initial key into schedule",
+    "Get the previous key",
+    "Perform shift row operation",
+    "Perform substitute row operation",
+    "Add the round constant",
+    "Add equivalent key from earlier round",
+    "Save key in schedule"
+};
 
 /* Key schedule window */
 struct window_s key_sched_win;
@@ -36,6 +47,10 @@ unsigned int key_sched_count;
 
 /* Backup of cursor state */
 int curs_bu;
+/* Longest operation string */
+size_t max_op_len;
+/* Current operation to highlight, -1 means no highlight */
+int current_op;
 
 /**
  * Initializes a window_s object
@@ -109,6 +124,28 @@ void pop_sbox_win () {
 }
 
 /**
+ * Populate the operations list
+ */
+void pop_ops () {
+    unsigned int cx;
+
+    /* Initial max */
+    max_op_len = 1;
+
+    /* Write an entry for each operation, tracking the max length */
+    for (cx = 0; cx < sizeof(ops) / sizeof(*ops); cx++) {
+        max_op_len = MAX(max_op_len, strlen(*(ops + cx)));
+        mvwprintw(ops_win.win, 1 + cx, 1,
+            "%s", *(ops + cx));
+    }
+
+    /* Draw the separator */
+    mvwaddch(ops_win.win, 0, max_op_len + 1, ACS_TTEE);
+    mvwvline(ops_win.win, 1, max_op_len + 1, ACS_VLINE, ops_win.height - 2);
+    mvwaddch(ops_win.win, ops_win.height - 1, max_op_len + 1, ACS_BTEE);
+}
+
+/**
  * ncurses initialization function
  */
 void init_ncurses () {
@@ -145,6 +182,8 @@ void init_ncurses () {
              key_sched_win.x - 1, 0,
              0, state_win.height,
              "Operations");
+    pop_ops();
+    current_op = -1;
     init_win(&step_win,
              params_win.width, 3,
              params_win.x, params_win.height + 1,
@@ -192,6 +231,31 @@ void update_schedule () {
                       "%02hhx", *(*(schedule + key_sched_top + cx) + cx2));
         }
     }
+    update_panels();
+    doupdate();
+}
+
+/**
+ * Highlight a new operation
+ * op: operation number to highlight, -1 means no highlight
+ */
+void highlight_op (int op) {
+    /* Un-highlight currently highlighted operation */
+    if (current_op >= 0) {
+        mvwchgat(ops_win.win, 1 + current_op, 1, max_op_len,
+            A_NORMAL, 0, 0);
+    }
+
+    /* Highlight the selected operation */
+    if (op >= 0) {
+        mvwchgat(ops_win.win, 1 + op, 1, max_op_len,
+            A_STANDOUT, 0, 0);
+    }
+
+    /* Track the highlighted operation */
+    current_op = op;
+
+    /* Show highlight */
     update_panels();
     doupdate();
 }
