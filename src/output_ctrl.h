@@ -38,6 +38,10 @@ extern int SUB_ROW_OP;
 extern int ADD_ROUND_CONST_OP;
 extern int ADD_EQUIV_KEY_OP;
 extern int SAVE_KEY_OP;
+extern int COPY_INTO_STATE_OP;
+extern int SUB_BYTES_OP;
+extern int MIX_COLS_OP;
+extern int ADD_ROUND_KEY_OP;
 
 void init_ncurses ();
 void leave_ncurses ();

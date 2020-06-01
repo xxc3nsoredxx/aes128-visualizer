@@ -138,6 +138,7 @@ int main (int argc, char **argv) {
                   "                                            ");
         mvwprintw(step_win.win, 1, 1,
                   "Copy input into state");
+        highlight_op(COPY_INTO_STATE_OP);
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
                 /* Put in state window */
@@ -160,12 +161,14 @@ int main (int argc, char **argv) {
     for (round = 0; round < NR + 1; round++) {
         if (use_ncurses) {
             /* Display state in the state window */
+            highlight_op(COPY_INTO_STATE_OP);
             for (cx = 0; cx < NB; cx++) {
                 for (cx2 = 0; cx2 < BPW; cx2++) {
                     mvwprintw(state_win.win, 1 + (cx * 2), 1 + (cx2 * 3),
                               "%02hhx", *(*(state + cx) + cx2));
                     update_panels();
                     doupdate();
+                    napms(DELAY_MS);
                 }
             }
         } else {
@@ -186,10 +189,18 @@ int main (int argc, char **argv) {
         }
 
         /* Feed the state through the s-box */
+        if (use_ncurses) {
+            highlight_op(SUB_BYTES_OP);
+            update_panels();
+            doupdate();
+        }
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
                 char *c = *(state + cx) + cx2;
                 *c = sub_byte(*c);
+                if (use_ncurses) {
+                    napms(DELAY_MS);
+                }
             }
         }
         if (use_ncurses) {
@@ -204,8 +215,16 @@ int main (int argc, char **argv) {
         }
 
         /* Shift the rows */
+        if (use_ncurses) {
+            highlight_op(SHIFT_ROW_OP);
+            update_panels();
+            doupdate();
+        }
         for (cx = 1; cx < BPW; cx++) {
             shift_row(*(state + cx), cx);
+            if (use_ncurses) {
+                napms(DELAY_MS);
+            }
         }
         if (use_ncurses) {
         } else {
@@ -222,8 +241,16 @@ int main (int argc, char **argv) {
         if (round == NR) {
             goto add_key;
         }
+        if (use_ncurses) {
+            highlight_op(MIX_COLS_OP);
+            update_panels();
+            doupdate();
+        }
         for (cx = 0; cx < NB; cx++) {
             mix_col(cx);
+            if (use_ncurses) {
+                napms(DELAY_MS);
+            }
         }
         if (use_ncurses) {
         } else {
@@ -238,7 +265,15 @@ int main (int argc, char **argv) {
 
 add_key:
         /* Add the round key */
+        if (use_ncurses) {
+            highlight_op(ADD_ROUND_KEY_OP);
+            update_panels();
+            doupdate();
+        }
         add_round_key(round);
+        if (use_ncurses) {
+            napms(DELAY_MS);
+        }
 
         if (!use_ncurses) {
             /* Blank between rounds */
@@ -248,6 +283,7 @@ add_key:
 
     /* Print the final state */
     if (use_ncurses) {
+        highlight_op(COPY_INTO_STATE_OP);
         /* Display state in the state window */
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
@@ -255,6 +291,7 @@ add_key:
                           "%02hhx", *(*(state + cx) + cx2));
                 update_panels();
                 doupdate();
+                napms(DELAY_MS);
             }
         }
     } else {
@@ -270,6 +307,7 @@ add_key:
 
     /* Print the results */
     if (use_ncurses) {
+        highlight_op(NO_OP);
         /* Update the parameters window with the final ciphertext */
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
@@ -277,6 +315,7 @@ add_key:
                           "%02hhx", *(*(state + cx2) + cx));
                 update_panels();
                 doupdate();
+                napms(DELAY_MS);
             }
         }
     } else {

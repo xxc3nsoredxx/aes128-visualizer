@@ -22,7 +22,11 @@ const char *ops [] = {
     "Perform substitute row operation",
     "Add the round constant",
     "Add equivalent key from earlier round",
-    "Save key in schedule"
+    "Save key in schedule",
+    "Copy bytes into state",
+    "Perform substitute bytes operation",
+    "Perform mix columns operation",
+    "Add round key"
 };
 
 /* Key schedule window */
@@ -54,6 +58,10 @@ int SUB_ROW_OP = 3;
 int ADD_ROUND_CONST_OP = 4;
 int ADD_EQUIV_KEY_OP = 5;
 int SAVE_KEY_OP = 6;
+int COPY_INTO_STATE_OP = 7;
+int SUB_BYTES_OP = 8;
+int MIX_COLS_OP = 9;
+int ADD_ROUND_KEY_OP = 10;
 
 /* Backup of cursor state */
 int curs_bu;
