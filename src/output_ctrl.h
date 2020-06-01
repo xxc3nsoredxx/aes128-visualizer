@@ -30,6 +30,15 @@ extern struct window_s step_win;
 extern unsigned int key_sched_top;
 extern unsigned int key_sched_count;
 
+extern int NO_OP;
+extern int COPY_INIT_KEY_OP;
+extern int GET_PREV_KEY_OP;
+extern int SHIFT_ROW_OP;
+extern int SUB_ROW_OP;
+extern int ADD_ROUND_CONST_OP;
+extern int ADD_EQUIV_KEY_OP;
+extern int SAVE_KEY_OP;
+
 void init_ncurses ();
 void leave_ncurses ();
 void update_schedule ();

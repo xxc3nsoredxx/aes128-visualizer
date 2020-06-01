@@ -45,11 +45,21 @@ unsigned int key_sched_top;
 /* Number of elements to show */
 unsigned int key_sched_count;
 
+/* Operation offsets */
+int NO_OP = -1;
+int COPY_INIT_KEY_OP = 0;
+int GET_PREV_KEY_OP = 1;
+int SHIFT_ROW_OP = 2;
+int SUB_ROW_OP = 3;
+int ADD_ROUND_CONST_OP = 4;
+int ADD_EQUIV_KEY_OP = 5;
+int SAVE_KEY_OP = 6;
+
 /* Backup of cursor state */
 int curs_bu;
 /* Longest operation string */
 size_t max_op_len;
-/* Current operation to highlight, -1 means no highlight */
+/* Current highlighted operation */
 int current_op;
 
 /**
@@ -183,7 +193,7 @@ void init_ncurses () {
              0, state_win.height,
              "Operations");
     pop_ops();
-    current_op = -1;
+    current_op = NO_OP;
     init_win(&step_win,
              params_win.width, 3,
              params_win.x, params_win.height + 1,
@@ -237,17 +247,17 @@ void update_schedule () {
 
 /**
  * Highlight a new operation
- * op: operation number to highlight, -1 means no highlight
+ * op: operation number to highlight
  */
 void highlight_op (int op) {
     /* Un-highlight currently highlighted operation */
-    if (current_op >= 0) {
+    if (current_op != NO_OP) {
         mvwchgat(ops_win.win, 1 + current_op, 1, max_op_len,
             A_NORMAL, 0, 0);
     }
 
     /* Highlight the selected operation */
-    if (op >= 0) {
+    if (op != NO_OP) {
         mvwchgat(ops_win.win, 1 + op, 1, max_op_len,
             A_STANDOUT, 0, 0);
     }

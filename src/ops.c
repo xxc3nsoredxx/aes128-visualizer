@@ -130,7 +130,7 @@ void key_expand (const char *keystr) {
 
     /* Highlight operation */
     if (use_ncurses) {
-        highlight_op(0);
+        highlight_op(COPY_INIT_KEY_OP);
     }
     /* Copy the key into the first part of the schedule */
     for (cx = 0; cx < NK; cx++) {
@@ -147,7 +147,7 @@ void key_expand (const char *keystr) {
     for (cx = NK; cx < NB * (NR + 1); cx++) {
         /* Highlight operation */
         if (use_ncurses) {
-            highlight_op(1);
+            highlight_op(GET_PREV_KEY_OP);
         }
         memcpy(temp, *(schedule + cx - 1), BPW);
         update_panels();
@@ -157,21 +157,21 @@ void key_expand (const char *keystr) {
         if (cx % NK == 0) {
             /* sub_word(shift_row(temp)) xor round_constant(rcon, cx/NK) */
             if (use_ncurses) {
-                highlight_op(2);
+                highlight_op(SHIFT_ROW_OP);
             }
             shift_row(temp, 1);
             update_panels();
             doupdate();
             napms(DELAY_MS);
             if (use_ncurses) {
-                highlight_op(3);
+                highlight_op(SUB_ROW_OP);
             }
             sub_word(temp);
             update_panels();
             doupdate();
             napms(DELAY_MS);
             if (use_ncurses) {
-                highlight_op(4);
+                highlight_op(ADD_ROUND_CONST_OP);
             }
             round_constant(rcon, cx / NK);
             xor_word(temp, rcon);
@@ -183,14 +183,14 @@ void key_expand (const char *keystr) {
         }
         /* schedule[cx] = schedule[cx-NK] xor temp */
         if (use_ncurses) {
-            highlight_op(5);
+            highlight_op(ADD_EQUIV_KEY_OP);
         }
         xor_word(temp, *(schedule + cx - NK));
         update_panels();
         doupdate();
         napms(DELAY_MS);
         if (use_ncurses) {
-            highlight_op(6);
+            highlight_op(SAVE_KEY_OP);
         }
         memcpy(*(schedule + cx), temp, BPW);
         /* Update the schedule window */
