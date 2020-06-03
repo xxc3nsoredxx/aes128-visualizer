@@ -226,10 +226,15 @@ void add_round_key (unsigned int round) {
 
     /* Print the round key */
     if (use_ncurses) {
+        /* Blank the round key window */
+        for (cx = 0; cx < NB; cx++) {
+            mvwprintw(round_key_win.win, 1 + (cx * 2), 1,
+                      "           ");
+        }
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
                 mvwprintw(round_key_win.win, 1 + (cx2 * 2), 1 + (cx * 3),
-                          "%02hhx", *(*(key + cx) + cx2));
+                          "%02hhx", *(*(key + cx2) + cx));
                 /* Highlight the byte in the key schedule */
                 mvwchgat(key_sched_win.win, 1, 1 + (cx2 * 3), 2,
                          A_STANDOUT, 0, 0);

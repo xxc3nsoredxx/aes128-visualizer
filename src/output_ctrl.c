@@ -255,25 +255,6 @@ void update_schedule () {
 }
 
 /**
- * Updates the step shown in the relevant window
- * str: string to update with, max length 44 chars
- */
-void update_step (const char *str) {
-    /* Used to blank the current text */
-    const char *clear = "                                            ";
-    /* Buffer used to truncate the string if needed */
-    char text [45] = {0};
-
-    strncpy(text, str, 44);
-
-    /* Replace the text */
-    mvwprintw(step_win.win, 1, 1,
-              "%s", clear);
-    mvwprintw(step_win.win, 1, 1,
-              "%s", text);
-}
-
-/**
  * Highlight a new operation
  * op: operation number to highlight
  */
@@ -296,4 +277,48 @@ void highlight_op (int op) {
     /* Show highlight */
     update_panels();
     doupdate();
+}
+
+/**
+ * Updates the step shown in the relevant window
+ * str: string to update with, max length 44 chars
+ */
+void update_step (const char *str) {
+    /* Used to blank the current text */
+    const char *clear = "                                            ";
+    /* Buffer used to truncate the string if needed */
+    char text [45] = {0};
+
+    strncpy(text, str, 44);
+
+    /* Replace the text */
+    mvwprintw(step_win.win, 1, 1,
+              "%s", clear);
+    mvwprintw(step_win.win, 1, 1,
+              "%s", text);
+}
+
+/**
+ * Updates the state window
+ */
+void update_state () {
+    unsigned int cx;
+    unsigned int cx2;
+
+    /* Blank the state window */
+    for (cx = 0; cx < NB; cx++) {
+        mvwprintw(state_win.win, 1 + (cx * 2), 1,
+                  "           ");
+    }
+
+    /* Update the state window */
+    for (cx = 0; cx < NB; cx++) {
+        for (cx2 = 0; cx2 < BPW; cx2++) {
+            mvwprintw(state_win.win, 1 + (cx2 * 2), 1 + (cx * 3),
+                      "%02hhx", *(*(state + cx2) + cx));
+            update_panels();
+            doupdate();
+            napms(DELAY_MS);
+        }
+    }
 }

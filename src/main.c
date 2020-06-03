@@ -160,16 +160,10 @@ int main (int argc, char **argv) {
             /* Display the round number in the current step window */
             snprintf(round_buf, 44, "Round %u", round);
             update_step(round_buf);
-            /* Display state in the state window */
-            highlight_op(COPY_INTO_STATE_OP);
-            for (cx = 0; cx < NB; cx++) {
-                for (cx2 = 0; cx2 < BPW; cx2++) {
-                    mvwprintw(state_win.win, 1 + (cx * 2), 1 + (cx2 * 3),
-                              "%02hhx", *(*(state + cx) + cx2));
-                    update_panels();
-                    doupdate();
-                    napms(DELAY_MS);
-                }
+            /* Display state in the state window unless round 0 */
+            if (round != 0) {
+                highlight_op(COPY_INTO_STATE_OP);
+                update_state();
             }
         } else {
             printf("Round %u\n", round);
@@ -285,15 +279,7 @@ add_key:
     if (use_ncurses) {
         highlight_op(COPY_INTO_STATE_OP);
         /* Display state in the state window */
-        for (cx = 0; cx < NB; cx++) {
-            for (cx2 = 0; cx2 < BPW; cx2++) {
-                mvwprintw(state_win.win, 1 + (cx * 2), 1 + (cx2 * 3),
-                          "%02hhx", *(*(state + cx) + cx2));
-                update_panels();
-                doupdate();
-                napms(DELAY_MS);
-            }
-        }
+        update_state();
     } else {
         printf("Final State:\n");
         for (cx = 0; cx < NB; cx++) {
