@@ -46,6 +46,7 @@ extern int ADD_ROUND_KEY_OP;
 void init_ncurses ();
 void leave_ncurses ();
 void update_schedule ();
+void update_step (const char *str);
 void highlight_op (int op);
 
 #endif /* OUTPUT_CTRL_H_20200528_224855 */

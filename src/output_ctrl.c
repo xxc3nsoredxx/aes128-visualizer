@@ -251,6 +251,26 @@ void update_schedule () {
     }
     update_panels();
     doupdate();
+    napms(DELAY_MS);
+}
+
+/**
+ * Updates the step shown in the relevant window
+ * str: string to update with, max length 44 chars
+ */
+void update_step (const char *str) {
+    /* Used to blank the current text */
+    const char *clear = "                                            ";
+    /* Buffer used to truncate the string if needed */
+    char text [45] = {0};
+
+    strncpy(text, str, 44);
+
+    /* Replace the text */
+    mvwprintw(step_win.win, 1, 1,
+              "%s", clear);
+    mvwprintw(step_win.win, 1, 1,
+              "%s", text);
 }
 
 /**

@@ -101,8 +101,7 @@ int main (int argc, char **argv) {
 
     /* Create the key schedule */
     if (use_ncurses) {
-        mvwprintw(step_win.win, 1, 1,
-                  "Key expansion");
+        update_step("Key expansion");
     }
     key_expand(key);
     /* Print the key schedule */
@@ -134,10 +133,7 @@ int main (int argc, char **argv) {
 
     /* Animate the input copying */
     if (use_ncurses) {
-        mvwprintw(step_win.win, 1, 1,
-                  "                                            ");
-        mvwprintw(step_win.win, 1, 1,
-                  "Copy input into state");
+        update_step("Copy input into state");
         highlight_op(COPY_INTO_STATE_OP);
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
@@ -159,7 +155,11 @@ int main (int argc, char **argv) {
 
     /* AES rounds */
     for (round = 0; round < NR + 1; round++) {
+        char round_buf [45] = {0};
         if (use_ncurses) {
+            /* Display the round number in the current step window */
+            snprintf(round_buf, 44, "Round %u", round);
+            update_step(round_buf);
             /* Display state in the state window */
             highlight_op(COPY_INTO_STATE_OP);
             for (cx = 0; cx < NB; cx++) {
@@ -307,17 +307,28 @@ add_key:
 
     /* Print the results */
     if (use_ncurses) {
+        update_step("Copy final state into output");
         highlight_op(NO_OP);
         /* Update the parameters window with the final ciphertext */
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
                 mvwprintw(params_win.win, 3, 13 + (((cx * NB) + cx2) * 2),
                           "%02hhx", *(*(state + cx2) + cx));
+                /* Highlight the bytes in the state */
+                mvwchgat(state_win.win, 1 + (cx2 * 2), 1 + (cx * 3), 2,
+                         A_STANDOUT, 0, 0);
                 update_panels();
                 doupdate();
                 napms(DELAY_MS);
             }
         }
+        /* Unhighlight all the bytes in the state once done */
+        for (cx = 0; cx < NB; cx++) {
+            mvwchgat(state_win.win, 1 + (cx * 2), 1, state_win.width - 2,
+                     A_NORMAL, 0, 0);
+        }
+        update_panels();
+        doupdate();
     } else {
         printf("Plaintext:  %s\n", input);
         printf("Key:        %s\n", key);

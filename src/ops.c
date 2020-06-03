@@ -228,10 +228,14 @@ void add_round_key (unsigned int round) {
     if (use_ncurses) {
         for (cx = 0; cx < NB; cx++) {
             for (cx2 = 0; cx2 < BPW; cx2++) {
-                mvwprintw(round_key_win.win, 1 + (cx * 2), 1 + (cx2 * 3),
+                mvwprintw(round_key_win.win, 1 + (cx2 * 2), 1 + (cx * 3),
                           "%02hhx", *(*(key + cx) + cx2));
+                /* Highlight the byte in the key schedule */
+                mvwchgat(key_sched_win.win, 1, 1 + (cx2 * 3), 2,
+                         A_STANDOUT, 0, 0);
                 update_panels();
                 doupdate();
+                napms(DELAY_MS);
             }
             if (key_sched_top >= NB * (NR + 1) - (key_sched_win.height - 2)) {
                 if (key_sched_count != 0) {
