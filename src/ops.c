@@ -122,6 +122,7 @@ void str_bytes (char *dest, const char *src, unsigned int len) {
  */
 void key_expand (const char *keystr) {
     unsigned int cx;
+    unsigned int cx2;
     char key [NK * BPW];
     char temp [BPW];
     char rcon [BPW];
@@ -145,14 +146,30 @@ void key_expand (const char *keystr) {
 
     /* Expand the key into the schedule */
     for (cx = NK; cx < NB * (NR + 1); cx++) {
-        /* Highlight operation */
-        if (use_ncurses) {
-            highlight_op(GET_PREV_KEY_OP);
-        }
         memcpy(temp, *(schedule + cx - 1), BPW);
-        update_panels();
-        doupdate();
-        napms(DELAY_MS);
+        if (use_ncurses) {
+            /* Clear the description */
+            clear_ops_desc();
+
+            /* Highlight operation */
+            highlight_op(GET_PREV_KEY_OP);
+
+            /* Highlight key in schedule and print in the description */
+            mvwchgat(key_sched_win.win, 1 + (cx - 1 - key_sched_top), 1, 11,
+                     A_STANDOUT, 0, 0);
+            for (cx2 = 0; cx2 < BPW; cx2++) {
+                mvwprintw(ops_win.win, 1, ops_desc_off + (cx2 * 3),
+                          "%02hhx ", *(temp + cx2));
+                update_panels();
+                doupdate();
+                napms(DELAY_MS);
+            }
+            /* Un-highlight the key in schedule */
+            mvwchgat(key_sched_win.win, 1 + (cx - 1 - key_sched_top), 1, 11,
+                     A_NORMAL, 0, 0);
+            update_panels();
+            doupdate();
+        }
         /* temp =  */
         if (cx % NK == 0) {
             /* sub_word(shift_row(temp)) xor round_constant(rcon, cx/NK) */

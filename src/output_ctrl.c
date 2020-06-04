@@ -49,6 +49,9 @@ unsigned int key_sched_top;
 /* Number of elements to show */
 unsigned int key_sched_count;
 
+/* Column where the operations description portion begins */
+unsigned int ops_desc_off;
+
 /* Operation offsets */
 int NO_OP = -1;
 int COPY_INIT_KEY_OP = 0;
@@ -161,6 +164,9 @@ void pop_ops () {
     mvwaddch(ops_win.win, 0, max_op_len + 1, ACS_TTEE);
     mvwvline(ops_win.win, 1, max_op_len + 1, ACS_VLINE, ops_win.height - 2);
     mvwaddch(ops_win.win, ops_win.height - 1, max_op_len + 1, ACS_BTEE);
+
+    /* Set the description offset to after the separator */
+    ops_desc_off = max_op_len + 2;
 }
 
 /**
@@ -321,4 +327,19 @@ void update_state () {
             napms(DELAY_MS);
         }
     }
+}
+
+/**
+ * Clears the operation description portion of the window
+ */
+void clear_ops_desc () {
+    unsigned int cx;
+
+    /* Blank the screen by using a horizontal line of ' ' (space) */
+    for (cx = 1; cx < ops_win.height - 1; cx++) {
+        mvwhline(ops_win.win, cx, ops_desc_off, ' ',
+                 ops_win.width - (2 + ops_desc_off));
+    }
+    update_panels();
+    doupdate();
 }

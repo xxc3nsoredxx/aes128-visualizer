@@ -30,6 +30,8 @@ extern struct window_s step_win;
 extern unsigned int key_sched_top;
 extern unsigned int key_sched_count;
 
+extern unsigned int ops_desc_off;
+
 extern int NO_OP;
 extern int COPY_INIT_KEY_OP;
 extern int GET_PREV_KEY_OP;
@@ -49,5 +51,6 @@ void update_schedule ();
 void highlight_op (int op);
 void update_step (const char *str);
 void update_state ();
+void clear_ops_desc ();
 
 #endif /* OUTPUT_CTRL_H_20200528_224855 */
