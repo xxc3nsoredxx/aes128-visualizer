@@ -56,9 +56,39 @@ void xor_word (char *dest, char *src) {
  */
 void sub_word (char *word) {
     unsigned int cx;
+    int x;
+    int y;
 
+    /**
+     * Display the byte substitution description
+     * and show the s box window
+     */
+    if (use_ncurses) {
+        getyx(desc_win.win, y, x);
+        wprintw(desc_win.win, "  Byte substitution");
+        mvwprintw(desc_win.win, y + 1, 1, "-----------");
+        show_panel(s_box_win.pan);
+        update_panels();
+        doupdate();
+        napms(DELAY_MS);
+    }
     for (cx = 0; cx < BPW; cx++) {
         *(word + cx) = sub_byte(*(word + cx));
+        /* Update the description with the newly substituted byte */
+        if (use_ncurses) {
+            mvwprintw(desc_win.win, y + 2, 1 + (3 * cx),
+                      "%02hhx", *(word + cx));
+            update_panels();
+            doupdate();
+            napms(DELAY_MS);
+        }
+    }
+    /* Hide the s box window again */
+    if (use_ncurses) {
+        hide_panel(s_box_win.pan);
+        update_panels();
+        doupdate();
+        napms(DELAY_MS);
     }
 }
 
@@ -190,16 +220,15 @@ void key_expand (const char *keystr) {
                     napms(DELAY_MS);
                 }
             }
-            update_panels();
-            doupdate();
-            napms(DELAY_MS);
             if (use_ncurses) {
                 highlight_op(SUB_ROW_OP);
             }
             sub_word(temp);
-            update_panels();
-            doupdate();
-            napms(DELAY_MS);
+            if (use_ncurses) {
+                update_panels();
+                doupdate();
+                napms(DELAY_MS);
+            }
             if (use_ncurses) {
                 highlight_op(ADD_ROUND_CONST_OP);
             }
@@ -302,8 +331,36 @@ void add_round_key (unsigned int round) {
 char sub_byte (char byte) {
     unsigned int row = (byte >> 4) & 0x0f;
     unsigned int col = byte & 0x0f;
+    unsigned int cx;
+    char ret = *(*(SBOX + row) + col);
 
-    return *(*(SBOX + row) + col);
+    /* Animate the s box operation */
+    if (use_ncurses) {
+        /* Highlight the row */
+        mvwchgat(s_box_win.win, 3 + (row * 2), 4, s_box_win.width - 5,
+                 A_STANDOUT, 0, 0);
+        /* Highlight the column */
+        for (cx = 0; cx < s_box_win.height - 4; cx++) {
+            mvwchgat(s_box_win.win, 3 + cx, 4 + (3 * col), 2,
+                     A_STANDOUT, 0, 0);
+        }
+        update_panels();
+        doupdate();
+        napms(DELAY_MS * 3);
+        /* Un-highlight the row */
+        mvwchgat(s_box_win.win, 3 + (row * 2), 4, s_box_win.width - 5,
+                 A_NORMAL, 0, 0);
+        /* Un-highlight the column */
+        for (cx = 0; cx < s_box_win.height - 4; cx++) {
+            mvwchgat(s_box_win.win, 3 + cx, 4 + (3 * col), 2,
+                     A_NORMAL, 0, 0);
+        }
+        update_panels();
+        doupdate();
+        napms(DELAY_MS * 3);
+    }
+
+    return ret;
 }
 
 /**
@@ -325,7 +382,6 @@ void shift_row (char *row, unsigned int amt) {
 
     /* Display in the description */
     if (use_ncurses) {
-        /* Get current window position */
         getyx(desc_win.win, y, x);
         wprintw(desc_win.win, "  Row shift");
         mvwprintw(desc_win.win, y + 1, 1, "-----------");
