@@ -44,9 +44,22 @@ char poly_mult (char a, char b) {
  */
 void xor_word (char *dest, char *src) {
     unsigned int cx;
+    int x;
+    int y;
 
+    if (use_ncurses) {
+        getyx(desc_win.win, y, x);
+    }
     for (cx = 0; cx < BPW; cx++) {
         *(dest + cx) = *(dest + cx) ^ *(src + cx);
+        /* Show in the description window */
+        if (use_ncurses) {
+            mvwprintw(desc_win.win, y + 1, 1 + (3 * cx),
+                      "%02hhx", *(dest + cx));
+            update_panels();
+            doupdate();
+            napms(DELAY_MS);
+        }
     }
 }
 
@@ -65,7 +78,7 @@ void sub_word (char *word) {
      */
     if (use_ncurses) {
         getyx(desc_win.win, y, x);
-        wprintw(desc_win.win, "  Byte substitution");
+        wprintw(desc_win.win, "   Byte substitution");
         mvwprintw(desc_win.win, y + 1, 1, "-----------");
         show_panel(s_box_win.pan);
         update_panels();
@@ -80,7 +93,6 @@ void sub_word (char *word) {
                       "%02hhx", *(word + cx));
             update_panels();
             doupdate();
-            napms(DELAY_MS);
         }
     }
     /* Hide the s box window again */
@@ -233,10 +245,25 @@ void key_expand (const char *keystr) {
                 highlight_op(ADD_ROUND_CONST_OP);
             }
             round_constant(rcon, cx / NK);
+            /* Show the round constant in the window */
+            if (use_ncurses) {
+                getyx(desc_win.win, y, x);
+                mvwprintw(desc_win.win, y + 1, x, "   Add round constant");
+                update_panels();
+                doupdate();
+                for (cx2 = 0; cx2 < BPW; cx2++) {
+                    mvwprintw(desc_win.win, y + 1, 1 + (3 * cx2),
+                              "%02hhx", *(rcon + cx2));
+                    update_panels();
+                    doupdate();
+                    napms(DELAY_MS);
+                }
+                mvwprintw(desc_win.win, y + 2, 1, "-----------");
+                update_panels();
+                doupdate();
+                napms(DELAY_MS);
+            }
             xor_word(temp, rcon);
-            update_panels();
-            doupdate();
-            napms(DELAY_MS);
         } else if (NK > 6 && (cx % NK == 4)) {
             sub_word(temp);
         }
@@ -357,7 +384,6 @@ char sub_byte (char byte) {
         }
         update_panels();
         doupdate();
-        napms(DELAY_MS * 3);
     }
 
     return ret;
