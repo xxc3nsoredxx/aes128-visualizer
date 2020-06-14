@@ -26,11 +26,10 @@ extern struct window_s s_box_win;
 extern struct window_s params_win;
 extern struct window_s ops_win;
 extern struct window_s step_win;
+extern struct window_s desc_win;
 
 extern unsigned int key_sched_top;
 extern unsigned int key_sched_count;
-
-extern unsigned int ops_desc_off;
 
 extern int NO_OP;
 extern int COPY_INIT_KEY_OP;

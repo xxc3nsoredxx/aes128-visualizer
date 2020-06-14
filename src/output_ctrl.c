@@ -43,6 +43,8 @@ struct window_s params_win;
 struct window_s ops_win;
 /* Current step window */
 struct window_s step_win;
+/* Operations description window */
+struct window_s desc_win;
 
 /* Index to the top most schedule element to show */
 unsigned int key_sched_top;
@@ -159,14 +161,6 @@ void pop_ops () {
         mvwprintw(ops_win.win, 1 + cx, 1,
             "%s", *(ops + cx));
     }
-
-    /* Draw the separator */
-    mvwaddch(ops_win.win, 0, max_op_len + 1, ACS_TTEE);
-    mvwvline(ops_win.win, 1, max_op_len + 1, ACS_VLINE, ops_win.height - 2);
-    mvwaddch(ops_win.win, ops_win.height - 1, max_op_len + 1, ACS_BTEE);
-
-    /* Set the description offset to after the separator */
-    ops_desc_off = max_op_len + 2;
 }
 
 /**
@@ -207,11 +201,22 @@ void init_ncurses () {
              0, state_win.height,
              "Operations");
     pop_ops();
+    /* Reinitialize with the length of the max operation */
+    remove_win(&ops_win);
+    init_win(&ops_win,
+             max_op_len + 2, 0,
+             0, state_win.height,
+             "Operations");
+    pop_ops();
     current_op = NO_OP;
     init_win(&step_win,
              params_win.width, 3,
              params_win.x, params_win.height + 1,
              "Current Step");
+    init_win(&desc_win,
+             key_sched_win.x - ops_win.width, 0,
+             ops_win.width, ops_win.y,
+             "Description");
 
     /* Show the windows, except for S-Box */
     hide_panel(s_box_win.pan);
@@ -224,6 +229,7 @@ void init_ncurses () {
  */
 void leave_ncurses () {
     /* Delete the windows */
+    remove_win(&desc_win);
     remove_win(&step_win);
     remove_win(&ops_win);
     remove_win(&params_win);
@@ -337,9 +343,11 @@ void clear_ops_desc () {
 
     /* Blank the screen by using a horizontal line of ' ' (space) */
     for (cx = 1; cx < ops_win.height - 1; cx++) {
-        mvwhline(ops_win.win, cx, ops_desc_off, ' ',
-                 ops_win.width - (2 + ops_desc_off));
+        mvwhline(desc_win.win, cx, 1, ' ',
+                 desc_win.width - 2);
     }
+    /* Reset cursor to top left */
+    wmove(desc_win.win, 1, 1);
     update_panels();
     doupdate();
 }

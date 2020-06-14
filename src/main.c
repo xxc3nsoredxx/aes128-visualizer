@@ -157,6 +157,8 @@ int main (int argc, char **argv) {
     for (round = 0; round < NR + 1; round++) {
         char round_buf [45] = {0};
         if (use_ncurses) {
+            /* Clear the description eac round */
+            clear_ops_desc();
             /* Display the round number in the current step window */
             snprintf(round_buf, 44, "Round %u", round);
             update_step(round_buf);

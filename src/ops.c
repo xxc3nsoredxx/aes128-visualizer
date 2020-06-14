@@ -126,6 +126,8 @@ void key_expand (const char *keystr) {
     char key [NK * BPW];
     char temp [BPW];
     char rcon [BPW];
+    int x;
+    int y;
 
     str_bytes(key, keystr, NK);
 
@@ -158,7 +160,7 @@ void key_expand (const char *keystr) {
             mvwchgat(key_sched_win.win, 1 + (cx - 1 - key_sched_top), 1, 11,
                      A_STANDOUT, 0, 0);
             for (cx2 = 0; cx2 < BPW; cx2++) {
-                mvwprintw(ops_win.win, 1, ops_desc_off + (cx2 * 3),
+                mvwprintw(desc_win.win, 1, 1 + (cx2 * 3),
                           "%02hhx ", *(temp + cx2));
                 update_panels();
                 doupdate();
@@ -177,6 +179,17 @@ void key_expand (const char *keystr) {
                 highlight_op(SHIFT_ROW_OP);
             }
             shift_row(temp, 1);
+            /* Display shift row results */
+            if (use_ncurses) {
+                getyx(desc_win.win, y, x);
+                for (cx2 = 0; cx2 < BPW; cx2++) {
+                    mvwprintw(desc_win.win, y + 1, 1 + (cx2 * 3),
+                              "%02hhx", *(temp + cx2));
+                    update_panels();
+                    doupdate();
+                    napms(DELAY_MS);
+                }
+            }
             update_panels();
             doupdate();
             napms(DELAY_MS);
@@ -301,10 +314,21 @@ char sub_byte (char byte) {
  */
 void shift_row (char *row, unsigned int amt) {
     char save;
+    int x;
+    int y;
+
     for (; amt > 0; amt--) {
         save = *row;
         memmove(row, row + 1, BPW - 1);
         *(row + BPW - 1) = save;
+    }
+
+    /* Display in the description */
+    if (use_ncurses) {
+        /* Get current window position */
+        getyx(desc_win.win, y, x);
+        wprintw(desc_win.win, "  Row shift");
+        mvwprintw(desc_win.win, y + 1, 1, "-----------");
     }
 }
 
