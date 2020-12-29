@@ -7,11 +7,18 @@
 # Include directories
 !*/
 
+# Include Makefiles
+!Makefile
+!makefile
+
 # Include LICENSE
 !LICENSE
 
 # Begin actual ignores
 *.o
+*.ko
+*.so
+*.so.*
 
 *.swp
 *.tmp
