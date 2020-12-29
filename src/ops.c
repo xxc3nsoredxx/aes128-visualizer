@@ -328,7 +328,7 @@ void add_round_key (unsigned int round) {
                 doupdate();
                 napms(DELAY_MS);
             }
-            if (key_sched_top >= NB * (NR + 1) - (key_sched_win.height - 2)) {
+            if (NB * (NR + 1) - key_sched_top <= key_sched_win.height - 2) {
                 if (key_sched_count != 0) {
                     key_sched_count--;
                 }
